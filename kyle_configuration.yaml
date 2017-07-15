@@ -1,0 +1,133 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: 30.5795
+  longitude: -84.2055
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 48
+  # metric for Metric, imperial for Imperial
+  unit_system: imperial
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/New_York
+
+# Show links to resources in log and frontend
+introduction:
+
+# Enables the frontend
+frontend:
+
+# Enables configuration UI
+config:
+
+http:
+  # Uncomment this to add a password (recommended!)
+  # api_password: PASSWORD
+  # Uncomment this if you are using SSL or running in Docker etc
+  # base_url: example.duckdns.org:8123
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+
+# Discover some devices automatically
+discovery:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time.
+history:
+
+# View all events in a logbook
+logbook:
+
+# Track the sun
+sun:
+
+# Weather Prediction
+sensor:
+  - platform: yr
+
+
+# Text to speech
+tts:
+  platform: google
+
+
+light:
+  platform: hue
+  host: 10.0.0.102
+  allow_unreachable: true
+
+
+media_player:
+# Bedroom Television #
+  - platform: webostv
+    host: 10.0.0.20
+    mac: E4:3E:D7:84:AB:CF
+    name: Bedroom TV
+    filename: webostv.conf
+    customize:
+      sources:
+        - livetv
+        - youtube
+        - makotv
+        - netflix
+        - Plex
+        - Channel Plus
+        - 'Amazon Prime Video'
+        - hdmi1
+        - hdmi2
+        - hdmi3
+  - platform: plex
+    ip_address: 10.0.0.100
+    port: 32400
+    username: 
+    password:
+
+group: !include groups.yaml
+automation: !include automations.yaml
+automation 1:
+  - alias: Wake Up with Bedroom TV
+    trigger:
+      platform: time
+      at: 06:15:00
+    condition:
+      - condition: time
+        weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+    action:
+      - service: homeassistant.turn_on
+        entity_id: media_player.bedroom_tv
+      - delay: 00:00:15
+      - service: media_player.select_source
+        entity_id: media_player.bedroom_tv
+        data:
+          source: livetv
+
+automation 2:
+  - alias: Wake Up with Bedroom Lights
+    trigger:
+      platform: time
+      at: 06:15:00
+    condition:
+      - condition: time
+        weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+    action:
+      - service: light.hue_activate_scene
+        data:
+          group_name: Bedroom
+          scene_name: 'Good Morning'
