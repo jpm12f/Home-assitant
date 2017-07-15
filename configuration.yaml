@@ -1,0 +1,404 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Marshall House
+  # Location required to calculate the time the sun rises and sets
+  latitude: 30.564727630
+  longitude: -84.1714337
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 150
+  # metric for Metric, imperial for Imperial
+  unit_system: imperial
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/New_York
+
+  customize:
+    light.left:
+      hidden: true
+
+    light.right:
+      hidden: true
+
+    light.middle:
+      hidden: true
+
+    light.dimmer_2:
+      hidden: true
+
+    light.island:
+      emulated_hue: true
+      emulated_hue_name: "island"
+
+    zwave._:
+      hidden: true
+
+    zwave.aeotec_zw090_zstick_gen5_us:
+      hidden: true
+
+    zwave.ge_14291_inwall_smart_switch:
+      friendly_name: Front Porch Lights
+      hidden: true
+
+    zwave.ge_12722_onoff_relay_switch:
+      hidden: true
+
+    zwave.ge_12724_3way_dimmer_switch_2:
+      hidden: true
+
+    switch.ge_14291_inwall_smart_switch_switch:
+      friendly_name: Front Porch
+      emulated_hue: true
+      emulated_hue_name: "Front Porch"
+
+    fan.ge_12730_fan_control_switch_level:
+      friendly_name: Bonus Room Fan
+      emulated_hue: true
+      emulated_hue_name: "Bonus Room Fan"
+
+    light.ge_12724_3way_dimmer_switch_level:
+      friendly_name: Bonus Room
+      emulated_hue: true
+      emulated_hue_name: "Bonus Room"
+
+    zwave.ge_12724_3way_dimmer_switch:
+      hidden: true
+
+    zwave.ge_12730_fan_control_switch:
+      hidden: true
+
+    switch.switch:
+      hidden: true
+
+    light.ge_12724_3way_dimmer_switch_level_2:
+      friendly_name: "Master Bedroom"
+      emulated_hue: true
+      emulated_hue_name: "Master Bedroom"
+
+    switch.ge_12722_onoff_relay_switch_switch:
+      friendly_name: "Carriage Lights"
+      emulated_hue: true
+      emulated_hue_name: "Carriage Lights"
+
+    media_player.directv_rid025253890971:
+      hidden: true
+
+    media_player.apple_tv__bonus_room:
+      hidden: true
+
+    media_player.apple_tv__living_room:
+      hidden: true
+
+    sensor.mainbee_humidity:
+      hidden: true
+
+    sensor.bonusbee_humidity:
+      hidden: true
+
+
+
+group:
+
+  lights:
+    name: Lights
+    entities:
+      - switch.ge_14291_inwall_smart_switch_switch
+      - light.island
+      - light.ge_12724_3way_dimmer_switch_level
+      - switch.ge_12722_onoff_relay_switch_switch
+      - light.ge_12724_3way_dimmer_switch_level_2
+
+  garage:
+    name: Garage Doors
+    entities:
+      - cover.1car_garage
+      - cover.2car_garage
+
+  thermostat:
+    name: Ecobee3 Thermostat
+    entities:
+      - climate.mainbee
+      - climate.bonusbee
+
+  audio_video:
+    name: Audio / Video
+    entities:
+      - media_player.apple_tv__bonus_room
+      - media_player.apple_tv__living_room
+      - media_player.bonus_room_receiver
+      - media_player.directv_rid025253890971
+
+  wakeuplight:
+    name: Wakeup light
+    control: hidden
+    entities:
+      - sensor.wakeup_alarm_time
+      - sensor.wakeup_start_time_lights
+      - sensor.wakeup_fadein_duration
+      - input_slider.wakeup_hour
+      - input_slider.wakeup_minutes
+      - input_slider.wakeup_duration
+      - input_boolean.wakeup
+      - input_boolean.wakeup_weekends
+
+
+# Show links to resources in log and frontend
+#introduction:
+
+# Enables the frontend
+frontend:
+
+# Enables configuration UI
+config:
+
+emulated_hue:
+  type: alexa
+  host_ip: 192.168.0.49
+  listen_port: 8300
+  expose_by_default: true
+  exposed_domains:
+    - light
+    - switch
+    - group
+    - input_boolean
+
+http:
+  # Uncomment this to add a password (recommended!)
+  # api_password: PASSWORD
+  # Uncomment this if you are using SSL or running in Docker etc
+  # base_url: example.duckdns.org:8123
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+
+# Discover some devices automatically
+discovery:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time.
+history:
+
+# View all events in a logbook
+logbook:
+
+# Track the sun
+sun:
+
+# Weather Prediction
+sensor:
+  - platform: darksky
+    api_key: 106065f4eec90bd877cf6f260f2b9102
+    monitored_conditions:
+      - summary
+      - nearest_storm_distance
+    update_interval:
+    # At least one of these must be specified:
+      days: 0
+      hours: 0
+      minutes: 4
+      seconds: 0
+      milliseconds: 0
+
+  - platform: template
+    sensors:
+      wakeup_alarm_time:
+        friendly_name: 'Alarm time'
+        value_template: '{% if states.input_slider.wakeup_hour.state|length == 3 %}0{% endif %}{{ states.input_slider.wakeup_hour.state | int }}:{% if states.input_slider.wakeup_minutes.state|length == 3 %}0{% endif %}{{ states.input_slider.wakeup_minutes.state | int }}'
+  - platform: template
+    sensors:
+      wakeup_start_time_lights:
+        friendly_name: 'Fade-in start time'
+        value_template: >
+          {% if states.wakeup_alarm_time and states.input_slider.wakeup_duration %}
+          {% set alarmtime = states.sensor.wakeup_alarm_time.state %}
+          {% set alarm_hour = alarmtime.split(":")[0] | int %}
+          {% set alarm_min = alarmtime.split(":")[1] | int %}
+          {% set light_dur = states.input_slider.wakeup_duration.state | int %}
+          {% set alarm_min_light = alarm_min - light_dur %}
+          {% if alarm_min_light  < 0 %}
+          {% set alarm_min_light = alarm_min_light + 60 %}
+          {% set alarm_hour_light = alarm_hour - 1 %}
+          {% if alarm_hour_light < 0 %}{% set alarm_hour_light = 23 %}{% endif %}
+          {% if alarm_hour_light < 10 %}0{% endif %}{{ alarm_hour_light}}:{% if alarm_min_light < 10 %}0{% endif %}{{ alarm_min_light }}
+          {% else %}
+          {% if alarm_hour < 10 %}0{% endif %}{{ alarm_hour }}:{% if alarm_min_light < 10 %}0{% endif %}{{ alarm_min_light }}
+          {% endif %}
+          {% endif %}
+
+  - platform: template
+    sensors:
+      wakeup_fadein_duration:
+        friendly_name: 'Fade-in duration'
+        value_template: '{{ states.input_slider.wakeup_duration.state | int }}'
+        unit_of_measurement: 'min'
+#  - platform: google_travel_time
+#    api_key: AIzaSyBqkhEwl3dfzkqyyRD0f82z2jwBqBumT-s
+#    origin: Tallahassee, Florida
+#    destination: Knoxville, Tennessee
+
+
+# Text to speech
+tts:
+  platform: google
+
+zwave:
+  usb_path: /dev/ttyACM0
+  config_path: /srv/homeassistant/lib/python3.4/site-packages/python_openzwave/ozw_config
+  polling_interval: 60000
+
+cover:
+  - platform: myq
+    username: jpmarshall1@comcast.net
+    password: Softball11
+    type: liftmaster
+
+light:
+  - platform: hue
+    host: 192.168.0.32
+    allow_unreachable: true
+
+ecobee:
+  api_key: CNpVDKbPFrhZXTA4ggrbhJA4X6ITVN8f
+
+media_player:
+  - platform: apple_tv
+    name: Apple TV - Bonus Room
+    host: 192.168.0.19
+    login_id: 00000000-105e-2018-c408-d42dcf4e4aa2
+  - platform: apple_tv
+    name: Apple TV - Living Room
+    host: 192.168.0.22
+    login_id: 00000000-105e-2018-c408-d42dcf4e4aa2
+  - platform: yamaha
+    name: Bonus Room Receiver
+    source_names:
+      HDMI2: "DirecTV"
+#  - platform: samsungtv
+#    host: 192.168.0.87:8001
+#    name: Bonus Room
+
+#Harmony Home Remote
+remote:
+  - platform: harmony
+    name: Bonus Room
+    host: 192.168.0.14
+
+#Device Trackers
+device_tracker:
+  - platform: unifi
+    host: 192.168.0.6
+    port: 8443
+    username: jpmarshall1
+    password: K1nl3y_1270
+    site_id: default
+    verify_ssl: False
+    track_new_devices: yes
+    interval_seconds: 5
+    consider_home: 180
+
+#group: !include groups.yaml
+#automation: !include automations.yaml
+
+
+
+automation 1:
+  - alias: Open garage when I get home
+    trigger:
+      platform: state
+      entity_id: device_tracker.jpsiphone
+      from: 'not_home'
+      to: 'home'
+    action:
+      - service: cover.open_cover
+        data:
+          entity_id: cover.2car_garage
+
+
+#Automation 2 - Wake-up Light
+input_slider:
+  wakeup_hour:
+    name: Hour
+    icon: mdi:clock-in
+    initial: 4
+    min: 0
+    max: 23
+    step: 1
+
+  wakeup_minutes:
+    name: Minutes
+    icon: mdi:clock-in
+    initial: 20
+    min: 0
+    max: 59
+    step: 1
+
+  wakeup_duration:
+    name: Light fade-in duration
+    icon: mdi:clock-in
+    initial: 10
+    min: 1
+    max: 60
+    step: 1
+
+automation 3:
+  - alias: 'WakeUp Light Bedroom'
+    hide_entity: False
+    trigger:
+      platform: template
+      value_template: '{{ states.sensor.time.state == states.sensor.wakeup_start_time_lights.state }}'
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: input_boolean.wakeup
+          state: 'on'
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: input_boolean.wakeup_weekends
+              state: 'on'
+            - condition: time
+              weekday:
+                - mon
+                #- tue
+                - wed
+                #- thu
+                - fri
+    action:
+      service: script.wakeup_bedroom
+
+script:
+  wakeup_bedroom:
+    alias: 'Wakeup lighting, smooth transition'
+    sequence:
+      - service: light.turn_on
+        data_template:
+          entity_id: light.ge_12724_3way_dimmer_switch_level_2
+          brightness: 1
+          xy_color: [0.3698, 0.3723]
+      - delay:
+          seconds: 1
+      - service: light.turn_on
+        data_template:
+          entity_id: light.ge_12724_3way_dimmer_switch_level_2
+          brightness: 120
+          transition: '{{ states.input_slider.wakeup_duration.state | multiply(60) | int }}'
+
+#automation 2:
+#  - alias: Turn on lights when I get home at night
+#    trigger:
+#        platform: state
+#        entity_id: device_tracker.jpsiphone
+#        to: 'Home'
+#    condition:
+#      - condition: time
+#        after: '19:00'
+#    action:
+#      - service: light.hue_activate_scene
+#        data:
+#          group_name: Garage
+#          scene_name: 'All on'
