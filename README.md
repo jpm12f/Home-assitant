@@ -1,2 +1,2 @@
-# Home-assitant
+# Home-assistant
 Home-Assistant Repo
