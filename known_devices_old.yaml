@@ -1,0 +1,90 @@
+
+beths_iphone:
+  hide_if_away: false
+  icon:
+  mac: 1C:91:48:C9:C1:E4
+  name: Beth
+  picture: /local/beth.JPG
+  track: true
+  vendor: Apple, Inc.
+
+homembair_2:
+  hide_if_away: true
+  icon:
+  mac: 64:76:BA:94:0C:A6
+  name: Home-MBAir
+  picture:
+  track: false
+  vendor: Apple, Inc.
+
+jpsiphone:
+  hide_if_away: false
+  icon:
+  mac: 90:B0:ED:B3:E8:7E
+  name: JP
+  picture: /local/jp.JPG
+  track: true
+  vendor: Apple, Inc.
+
+#jpsiphone:
+#  hide_if_away: false
+#  icon:
+#  mac:
+#  name: JP
+#  gravatar: jp.marshall@cci.fsu.edu
+#  track: true
+#  vendor:
+
+tap650700pr:
+  hide_if_away: false
+  icon:
+  mac: AC:63:BE:30:E0:FB
+  name: Tap-650700PR
+  picture:
+  track: false
+  vendor: Amazon Technologies Inc.
+
+000420f2b604:
+  hide_if_away: false
+  icon:
+  mac: 00:04:20:F2:B6:04
+  name: 000420f2b604
+  picture:
+  track: false
+  vendor: Slim Devices, Inc.
+
+jpsmacbookpro:
+  hide_if_away: false
+  icon:
+  mac: A4:5E:60:EE:74:5D
+  name: JPs-MacBook-Pro
+  picture:
+  track: false
+  vendor: Apple, Inc.
+
+jpsipad:
+  hide_if_away: false
+  icon:
+  mac: 4C:B1:99:1A:1F:1E
+  name: JPs-iPad
+  picture:
+  track: true
+  vendor: Apple, Inc.
+
+8871e5a2d3fb:
+  hide_if_away: false
+  icon:
+  mac: 88:71:E5:A2:D3:FB
+  name: 8871e5a2d3fb
+  picture:
+  track: true
+  vendor: Amazon Technologies Inc.
+
+amazonf43be2f78:
+  hide_if_away: false
+  icon:
+  mac: 18:74:2E:6D:58:44
+  name: amazon-f43be2f78
+  picture:
+  track: true
+  vendor: Amazon Technologies Inc.
