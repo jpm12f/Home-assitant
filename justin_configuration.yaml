@@ -1,0 +1,267 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: 916 San Luis
+  # C for Celcius, F for Fahrenheit
+  temperature_unit: F
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/New_York
+
+  latitude: 30.452944
+  longitude: -84.322258
+
+  customize:
+    light.couch:
+      hidden: true
+
+    light.desk:
+      hidden: true
+
+    light.dimmer_2:
+      hidden: true
+
+    switch.ge_unknown_type4952_id3036_switch_4_0:
+      friendly_name: West Floodlights
+    switch.ge_unknown_type4f50_id3031_switch_3_0:
+      friendly_name: GE Switch
+
+    climate.2gig_technologies_ct100_thermostat_usa_cooling_1_2_2:
+      friendly_name: Cool Mode
+
+    climate.2gig_technologies_ct100_thermostat_usa_heating_1_2_1:
+      friendly_name: Heat Mode
+
+    sensor.2gig_technologies_ct100_thermostat_usa_relative_humidity_2_5_3:
+      friendly_name: Humidity
+
+    sensor.2gig_technologies_ct100_thermostat_usa_temperature_2_1:
+      friendly_name: Cool Temp Sensor
+
+    sensor.2gig_technologies_ct100_thermostat_usa_temperature_2_1_2:
+      friendly_name: Heat Temp Sensor
+
+http:
+  cors_allowed_origins:
+    - http://10.0.1.111
+    - http://10.0.1.10
+    - http://10.0.1.9
+
+# Show links to resources in log and frontend
+#introduction:
+
+# Enables support for tracking state changes over time.
+history:
+
+# Discover some devices automatically
+discovery:
+
+# Track the sun
+sun:
+
+# Checks for available updates
+updater:
+
+# Enables the frontend
+frontend:
+
+# View all events in a logbook
+logbook:
+
+# Allows you to issue voice commands from the frontend
+conversation:
+
+#Zwave
+zwave:
+  usb_path: /dev/ttyACM0
+  config_path: /usr/local/lib/python3.4/dist-packages/libopenzwave-0.3.1-py3.4-linux-i686.egg/config
+  polling_interval: 60000
+
+#Device Trackers
+device_tracker:
+  platform: unifi
+  host: localhost
+  port: 8443
+  username: techadmin
+  password: Nice try Kyle
+  site_id: default
+  track_new_devices: yes
+  interval_seconds: 20
+  consider_home: 180
+
+#hue
+light:
+  platform: hue
+  host: 10.0.1.11
+  allow_unreachable: true
+
+group:
+
+  floodlights:
+    name: Floodlights
+    entities:
+      -  switch.ge_unknown_type4952_id3036_switch_4_0
+
+  justin_room:
+    name: Justin Lights
+    entities:
+      - light.Bedroom
+
+  automation_rules:
+    name: Automation Rules
+    entities:
+      - input_boolean.lighttest
+      - input_boolean.notify_test_switch
+      - input_boolean.thermostat_test
+
+#  thermostat_group:
+#    name: Thermostat Schedule
+#    entities:
+#      - input_boolean.thermostat_weekday_switch
+#      - input.boolean.thermostat_weekend_switch
+#      - input.boolean.thermostat_hold_switch
+
+  justin_page:
+    name: Justin's Room
+    view: yes
+    entities:
+      - group.justin_room
+
+#Scenes
+scene:
+  - name: Justin Blue
+    entities:
+      group.justin_room:
+        state: on
+        color_name: blue
+        brightness: 255
+
+  - name: Justin Blue Dim
+    entities:
+      group.justin_room:
+        state: on
+        color_name: blue
+        brightness: 10
+
+  - name: Justin Lights On
+    entities:
+      group.justin_room:
+        state: on
+        color_temp: 336
+        brightness: 255
+
+
+
+#Automation Rules Switches
+
+#  thermostat_weekday_switch:
+#    name: Thermostat Weekday Schedule
+#    initial: on
+
+#  thermostat_weekend_switch:
+#    name: Thermostat Weekend Schedule
+#    initial: on
+
+#  thermostat_hold_switch:
+#    name: Thermostat Hold Switch
+#    initial: off
+
+emulated_hue:
+  type: alexa
+  host_ip: 10.0.1.10
+  listen_port: 8300
+  expose_by_default: true
+  exposed_domains:
+    - light
+    - switch
+    - group
+    - input_boolean
+    - script
+
+script:
+  thermostat:
+    sequence:
+      - service: climate.set_temperature
+        data_template:
+          entity_id: climate.2gig_technologies_ct100_thermostat_usa_cooling_1_2_2
+          temperature: "{{ requested_level }}"
+
+automation:
+  alias: Turn on GE Switch with Justin's Hues
+  trigger:
+    platform: state
+    entity_id: light.Bedroom
+    state: 'on'
+  action:
+    service: homeassistant.turn_on
+    entity_id: switch.ge_unknown_type4f50_id3031_switch_3_0
+
+automation 1:
+  alias: Turn off GE Switch with Justin's Hues
+  trigger:
+    platform: state
+    entity_id: light.Bedroom
+    state: 'off'
+  action:
+    service: homeassistant.turn_off
+    entity_id: switch.ge_unknown_type4f50_id3031_switch_3_0
+
+automation 2:
+  alias: Floods - On at Sunset
+  trigger:
+    platform: sun
+    event: sunset
+  action:
+    service: homeassistant.turn_on
+    entity_id: group.floodlights
+
+automation 3:
+  alias: Floods - Off at Midnight
+  trigger:
+    platform: time
+    after: "23:59:00"
+  action:
+    service: homeassistant.turn_off
+    entity_id: group.floodlights
+
+automation 4:
+  alias: A/C - 74 at 12am
+  trigger:
+    platform: time
+    after: "00:00:00"
+  action:
+    service: climate.set_temperature
+    data:
+      entity_id: climate.2gig_technologies_ct100_thermostat_usa_cooling_1_2_2
+      temperature: 74
+
+automation 5:
+  alias: A/C - 76 at 9am
+  trigger:
+    platform: time
+    after: "09:00:00"
+  action:
+    service: climate.set_temperature
+    data:
+      entity_id: climate.2gig_technologies_ct100_thermostat_usa_cooling_1_2_2
+      temperature: 76
+
+automation 6:
+  alias: A/C - 79 at 11:30am
+  trigger:
+    platform: time
+    after: "11:30:00"
+  action:
+    service: climate.set_temperature
+    data:
+      entity_id: climate.2gig_technologies_ct100_thermostat_usa_cooling_1_2_2
+      temperature: 79
+
+automation 7:
+  alias: A/C - 77 at 4:45pm
+  trigger:
+    platform: time
+    after: "16:45:00"
+  action:
+    service: climate.set_temperature
+    data:
+      entity_id: climate.2gig_technologies_ct100_thermostat_usa_cooling_1_2_2
+      temperature: 77
